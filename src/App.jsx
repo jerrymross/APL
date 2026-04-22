@@ -16,6 +16,12 @@ const CERTIFICATE_STEP = courseSteps.length + 1;
 
 function loadSavedState() {
   try {
+    if (window.location.search.includes('reset=1')) {
+      localStorage.removeItem(STORAGE_KEY);
+      window.history.replaceState({}, '', window.location.pathname);
+      return null;
+    }
+
     const saved = localStorage.getItem(STORAGE_KEY);
     const parsed = saved ? JSON.parse(saved) : null;
     if (!parsed || typeof parsed !== 'object') return null;
