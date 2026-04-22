@@ -2,6 +2,28 @@
 
 Interaktiv 30-minuters handledarutbildning for APL-handledare.
 
+## Vercel
+
+Projektet ar gjort for Vercel med standard-Vite:
+
+```text
+Framework Preset: Vite
+Install Command: npm ci
+Build Command: npm run build
+Output Directory: dist
+```
+
+`vercel.json` finns redan i projektet och skickar alla routes till `index.html`, sa appen fungerar aven efter omladdning.
+
+## Deploy
+
+1. Ga till Vercel.
+2. Importera GitHub-repot `jerrymross/APL`.
+3. Lamna install/build/output enligt Vercels forslag eller vardena ovan.
+4. Klicka Deploy.
+
+Efter deploy oppnas appen pa Vercel-adressen direkt.
+
 ## Oppna lokalt
 
 Dubbelklicka pa:
@@ -23,22 +45,9 @@ Oppna sedan:
 http://localhost:5173/?reset=1
 ```
 
-## Publicera med GitHub Pages
-
-Appen byggs till mappen `docs/`, sa GitHub Pages kan peka direkt pa:
-
-```text
-Settings -> Pages -> Deploy from a branch -> main -> /docs
-```
-
-Efter det finns appen normalt pa:
-
-```text
-https://jerrymross.github.io/APL/
-```
-
-## Bygg
+## Bygg lokalt
 
 ```bash
 npm run build
+npm run preview
 ```
