@@ -89,7 +89,7 @@ function Card({ children, className }) {
   return (
     <section
       className={cx(
-        'screen-enter rounded-lg border border-white/10 bg-slate-950/62 p-5 shadow-glow backdrop-blur sm:p-7',
+        'screen-enter rounded-lg border border-blue-100 bg-white p-5 shadow-glow sm:p-7',
         className,
       )}
     >
@@ -107,17 +107,17 @@ function StepHeader({ section, title, children }) {
         </span>
         {children}
       </div>
-      <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl">{title}</h1>
+      <h1 className="text-3xl font-bold leading-tight text-astar-navy sm:text-4xl">{title}</h1>
     </div>
   );
 }
 
 function BulletList({ bullets }) {
   return (
-    <ul className="grid gap-3 text-lg text-slate-100">
+    <ul className="grid gap-3 text-lg text-slate-800">
       {bullets.map((bullet) => (
-        <li key={bullet} className="flex gap-3 rounded-md bg-white/[0.06] p-3">
-          <Check className="mt-1 h-5 w-5 shrink-0 text-astar-light" aria-hidden="true" />
+        <li key={bullet} className="flex gap-3 rounded-md border border-blue-100 bg-blue-50/70 p-3">
+          <Check className="mt-1 h-5 w-5 shrink-0 text-astar-secondary" aria-hidden="true" />
           <span>{bullet}</span>
         </li>
       ))}
@@ -128,13 +128,13 @@ function BulletList({ bullets }) {
 function AnswerButton({ option, index, isSelected, isCorrect, wasAnswered, onClick }) {
   const stateClass = wasAnswered
     ? isCorrect
-      ? 'border-emerald-300 bg-emerald-500/18 text-white'
+      ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
       : isSelected
-        ? 'border-astar-accent bg-astar-accent/18 text-white'
-        : 'border-white/10 bg-white/[0.04] text-slate-200'
+        ? 'border-astar-accent bg-red-50 text-red-950'
+        : 'border-blue-100 bg-white text-slate-700'
     : isSelected
-      ? 'border-astar-light bg-astar-secondary/44 text-white'
-      : 'border-white/10 bg-white/[0.04] text-slate-100 hover:border-astar-light hover:bg-white/[0.08]';
+      ? 'border-astar-secondary bg-blue-50 text-astar-navy'
+      : 'border-blue-100 bg-white text-slate-800 hover:border-astar-secondary hover:bg-blue-50';
 
   return (
     <button
@@ -146,7 +146,7 @@ function AnswerButton({ option, index, isSelected, isCorrect, wasAnswered, onCli
       type="button"
       aria-pressed={isSelected}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-astar-secondary/10 text-sm font-bold text-astar-secondary">
         {index + 1}
       </span>
       <span className="font-medium">{option}</span>
@@ -160,8 +160,8 @@ function FeedbackBox({ isCorrect, message }) {
       className={cx(
         'flex gap-3 rounded-md border p-4 text-base',
         isCorrect
-          ? 'border-emerald-300/70 bg-emerald-500/14 text-emerald-50'
-          : 'border-astar-accent/80 bg-astar-accent/14 text-red-50',
+          ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
+          : 'border-astar-accent bg-red-50 text-red-950',
       )}
       role="status"
     >
@@ -183,21 +183,21 @@ function QuizCard({ step, answer, onAnswer }) {
     <Card>
       <div className="space-y-6">
         <StepHeader section={step.section} title={step.title}>
-          <span className="text-sm text-astar-light">60-90 sekunder</span>
+          <span className="text-sm font-semibold text-astar-secondary">60-90 sekunder</span>
         </StepHeader>
         {step.body && (
-          <p className="rounded-md border border-white/10 bg-white/[0.05] p-4 text-lg leading-relaxed text-slate-100">
+          <p className="rounded-md border border-blue-100 bg-slate-50 p-4 text-lg leading-relaxed text-slate-800">
             {step.body}
           </p>
         )}
         <BulletList bullets={step.bullets} />
         {step.extra && (
-          <p className="rounded-md border border-astar-light/30 bg-astar-secondary/24 p-3 text-slate-100">
+          <p className="rounded-md border border-astar-light bg-blue-50 p-3 text-astar-navy">
             {step.extra}
           </p>
         )}
         <div className="space-y-4">
-          <h2 className="text-xl font-bold text-white">{step.prompt}</h2>
+          <h2 className="text-xl font-bold text-astar-navy">{step.prompt}</h2>
           <div className="grid gap-3">
             {step.options.map((option, index) => (
               <AnswerButton
@@ -234,15 +234,15 @@ function FinalTest({ answers, onAnswer }) {
     <Card>
       <div className="space-y-6">
         <StepHeader section="Sluttest" title="Visa vad du kan">
-          <span className="text-sm text-astar-light">Minst 4 av 5 rätt</span>
+          <span className="text-sm font-semibold text-astar-secondary">Minst 4 av 5 rätt</span>
         </StepHeader>
-        <p className="text-lg text-slate-100">
+        <p className="text-lg text-slate-800">
           Svara på fem korta frågor. Du får resultatet direkt på nästa steg.
         </p>
         <div className="space-y-5">
           {finalQuestions.map((question, questionIndex) => (
-            <div key={question.id} className="rounded-lg border border-white/10 bg-white/[0.04] p-4">
-              <h2 className="mb-3 text-lg font-bold text-white">
+            <div key={question.id} className="rounded-lg border border-blue-100 bg-slate-50 p-4">
+              <h2 className="mb-3 text-lg font-bold text-astar-navy">
                 {questionIndex + 1}. {question.prompt}
               </h2>
               <div className="grid gap-2">
@@ -252,8 +252,8 @@ function FinalTest({ answers, onAnswer }) {
                     className={cx(
                       'min-h-12 rounded-md border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-astar-light',
                       answers[questionIndex] === optionIndex
-                        ? 'border-astar-light bg-astar-secondary/50 text-white'
-                        : 'border-white/10 bg-slate-950/30 text-slate-100 hover:border-astar-light',
+                        ? 'border-astar-secondary bg-blue-50 text-astar-navy'
+                        : 'border-blue-100 bg-white text-slate-800 hover:border-astar-secondary',
                     )}
                     type="button"
                     onClick={() => onAnswer(questionIndex, optionIndex)}
@@ -265,7 +265,7 @@ function FinalTest({ answers, onAnswer }) {
             </div>
           ))}
         </div>
-        <p className="text-sm text-slate-300">{answeredCount} av 5 besvarade</p>
+        <p className="text-sm text-slate-600">{answeredCount} av 5 besvarade</p>
       </div>
     </Card>
   );
@@ -278,34 +278,34 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
         <StepHeader section="Certifikat" title="APL-handledare – Astar">
           <Award className="h-5 w-5 text-astar-accent" aria-hidden="true" />
         </StepHeader>
-        <p className="text-lg text-slate-100">
+        <p className="text-lg text-slate-800">
           Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
         </p>
-        <div className="rounded-lg border border-astar-light/30 bg-white/[0.06] p-5">
+        <div className="rounded-lg border border-blue-100 bg-slate-50 p-5">
           <label className="block text-sm font-bold uppercase tracking-wide text-astar-light" htmlFor="name">
             Namn
           </label>
           <input
             id="name"
-            className="mt-2 w-full rounded-md border border-white/10 bg-slate-950/80 px-4 py-3 text-lg text-white outline-none focus:border-astar-light focus:ring-2 focus:ring-astar-light/40"
+            className="mt-2 w-full rounded-md border border-blue-100 bg-white px-4 py-3 text-lg text-slate-950 outline-none focus:border-astar-secondary focus:ring-2 focus:ring-astar-light/40"
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Skriv ditt namn"
           />
           <dl className="mt-5 grid gap-3 sm:grid-cols-3">
             <div>
-              <dt className="text-sm text-slate-300">Datum</dt>
-              <dd className="font-bold text-white">{date}</dd>
+              <dt className="text-sm text-slate-600">Datum</dt>
+              <dd className="font-bold text-astar-navy">{date}</dd>
             </div>
             <div>
-              <dt className="text-sm text-slate-300">Resultat</dt>
+              <dt className="text-sm text-slate-600">Resultat</dt>
               <dd className={cx('font-bold', passed ? 'text-emerald-200' : 'text-red-100')}>
                 {passed ? 'Godkänd' : 'Ej godkänd'}
               </dd>
             </div>
             <div>
-              <dt className="text-sm text-slate-300">Poäng</dt>
-              <dd className="font-bold text-white">{score} av 5</dd>
+              <dt className="text-sm text-slate-600">Poäng</dt>
+              <dd className="font-bold text-astar-navy">{score} av 5</dd>
             </div>
           </dl>
         </div>
@@ -332,7 +332,7 @@ function Navigation({ canGoBack, canGoNext, isFinalStep, onBack, onNext }) {
   return (
     <nav className="flex items-center justify-between gap-3" aria-label="Navigering">
       <button
-        className="inline-flex min-h-12 items-center gap-2 rounded-md border border-white/15 px-4 py-3 font-bold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+        className="inline-flex min-h-12 items-center gap-2 rounded-md border border-blue-200 bg-white px-4 py-3 font-bold text-astar-navy transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
         type="button"
         onClick={onBack}
         disabled={!canGoBack}
@@ -436,13 +436,20 @@ export default function App() {
   return (
     <main className="min-h-screen px-4 py-5 sm:px-6 lg:py-8">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-        <header className="rounded-lg border border-white/10 bg-slate-950/50 p-4 backdrop-blur">
+        <header className="sticky top-0 z-10 rounded-lg border border-blue-100 bg-white/95 p-4 shadow-glow backdrop-blur">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold uppercase tracking-wide text-astar-light">Astar</p>
-              <p className="text-xl font-bold text-white">30-minuters APL-handledarutbildning</p>
+            <div className="flex items-center gap-4">
+              <img
+                src="/astar-logo.jpg"
+                alt="Astar"
+                className="h-12 w-auto rounded bg-white object-contain sm:h-14"
+              />
+              <div>
+                <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">APL</p>
+                <p className="text-xl font-bold text-astar-navy">30-minuters handledarutbildning</p>
+              </div>
             </div>
-            <div className="flex items-center gap-2 rounded-md bg-white/[0.06] px-3 py-2 text-sm text-slate-200">
+            <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-astar-navy">
               <ClipboardCheck className="h-4 w-4 text-astar-accent" aria-hidden="true" />
               {totalEstimatedMinutes} min
             </div>
@@ -496,8 +503,8 @@ export default function App() {
           />
         )}
 
-        <footer className="flex items-center justify-center gap-2 pb-4 text-center text-sm text-slate-300">
-          <Sparkles className="h-4 w-4 text-astar-light" aria-hidden="true" />
+        <footer className="flex items-center justify-center gap-2 pb-4 text-center text-sm text-slate-600">
+          <Sparkles className="h-4 w-4 text-astar-accent" aria-hidden="true" />
           Progress och resultat sparas automatiskt i den här webbläsaren.
         </footer>
       </div>

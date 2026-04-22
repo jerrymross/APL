@@ -5,14 +5,16 @@ export default {
     extend: {
       colors: {
         astar: {
-          bg: '#0f172a',
+          bg: '#f6f8fc',
+          ink: '#123f8c',
+          navy: '#0f2f67',
           accent: '#eb5c52',
-          secondary: '#2758a5',
+          secondary: '#1559c7',
           light: '#a0bce3',
         },
       },
       boxShadow: {
-        glow: '0 20px 70px rgba(39, 88, 165, 0.24)',
+        glow: '0 20px 70px rgba(21, 89, 199, 0.14)',
       },
     },
   },
