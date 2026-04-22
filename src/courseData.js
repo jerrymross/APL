@@ -4,6 +4,8 @@ export const courseSteps = [
     type: 'quiz',
     section: 'Introduktion',
     title: 'Din roll som handledare',
+    body:
+      'Som handledare är du elevens närmaste stöd i vardagen. Du behöver inte hålla en lektion, utan visa hur arbetet går till och hjälpa eleven att förstå vad som är viktigt på arbetsplatsen.',
     bullets: [
       'Eleven är här för att lära',
       'Du visar → eleven gör → du ger feedback',
@@ -26,6 +28,8 @@ export const courseSteps = [
     type: 'quiz',
     section: 'Första dagen',
     title: 'Första dagen',
+    body:
+      'Första dagen sätter tonen för hela APL-perioden. När eleven snabbt får veta var saker finns, vilka regler som gäller och vad hen ska börja med blir starten lugnare och mer meningsfull.',
     bullets: [
       'Visa arbetsplatsen',
       'Gå igenom säkerhet och rutiner',
@@ -49,6 +53,8 @@ export const courseSteps = [
     type: 'scenario',
     section: 'Handledning i praktiken',
     title: 'Så lär du ut',
+    body:
+      'Bra handledning sker i små steg. Börja med att visa momentet, gör det sedan tillsammans och låt eleven ta mer ansvar när du ser att hen är redo.',
     bullets: ['Visa', 'Gör tillsammans', 'Låt eleven göra själv'],
     prompt: 'Eleven har sett dig göra ett moment. Vad gör du nu?',
     options: [
@@ -67,6 +73,8 @@ export const courseSteps = [
     type: 'quiz',
     section: 'Feedback',
     title: 'Ge bra feedback',
+    body:
+      'Feedback fungerar bäst när den kommer nära situationen. Säg vad eleven gjorde, vad som behöver ändras och visa gärna hur nästa försök kan bli bättre.',
     bullets: ['Var tydlig', 'Var konkret', 'Visa hur det kan bli bättre'],
     prompt: 'Vilken feedback är bäst?',
     options: [
@@ -85,6 +93,8 @@ export const courseSteps = [
     type: 'scenario',
     section: 'Bedömning',
     title: 'Vad du ska titta på',
+    body:
+      'Du sätter inte betyg, men dina observationer hjälper skolan att förstå elevens utveckling. Titta på hur eleven arbetar, hur mycket stöd som behövs och om utvecklingen går framåt över tid.',
     bullets: [
       'Hur arbetet utförs (kvalitet)',
       'Hur självständig eleven är',

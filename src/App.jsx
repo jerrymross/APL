@@ -185,6 +185,11 @@ function QuizCard({ step, answer, onAnswer }) {
         <StepHeader section={step.section} title={step.title}>
           <span className="text-sm text-astar-light">60-90 sekunder</span>
         </StepHeader>
+        {step.body && (
+          <p className="rounded-md border border-white/10 bg-white/[0.05] p-4 text-lg leading-relaxed text-slate-100">
+            {step.body}
+          </p>
+        )}
         <BulletList bullets={step.bullets} />
         {step.extra && (
           <p className="rounded-md border border-astar-light/30 bg-astar-secondary/24 p-3 text-slate-100">
