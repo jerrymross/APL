@@ -15,6 +15,8 @@ export default {
       },
       boxShadow: {
         glow: '0 20px 70px rgba(21, 89, 199, 0.14)',
+        card: '0 18px 45px rgba(15, 47, 103, 0.10)',
+        lift: '0 16px 30px rgba(15, 47, 103, 0.16)',
       },
     },
   },

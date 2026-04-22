@@ -3,8 +3,12 @@ import {
   ArrowLeft,
   ArrowRight,
   Award,
+  BadgeCheck,
+  BookOpen,
   Check,
   ClipboardCheck,
+  Clock3,
+  Printer,
   RotateCcw,
   Sparkles,
   X,
@@ -72,8 +76,8 @@ function ProgressBar({ currentStep, totalSteps }) {
   const percent = currentStep === START_STEP ? 0 : Math.round((displayStep / totalSteps) * 100);
 
   return (
-    <div aria-label="Progress" className="space-y-2">
-      <div className="flex items-center justify-between text-sm font-semibold text-astar-navy">
+    <div aria-label="Progress" className="space-y-2.5">
+      <div className="flex items-center justify-between text-sm font-bold text-astar-navy">
         <span>
           {currentStep === START_STEP
             ? 'Start'
@@ -81,9 +85,9 @@ function ProgressBar({ currentStep, totalSteps }) {
         </span>
         <span>{percent}%</span>
       </div>
-      <div className="h-3 overflow-hidden rounded-full bg-white/10">
+      <div className="h-2.5 overflow-hidden rounded-full bg-blue-100">
         <div
-          className="h-full rounded-full bg-astar-accent transition-all duration-300"
+          className="h-full rounded-full bg-gradient-to-r from-astar-accent to-astar-secondary transition-all duration-300"
           style={{ width: `${percent}%` }}
         />
       </div>
@@ -95,7 +99,7 @@ function Card({ children, className }) {
   return (
     <section
       className={cx(
-        'screen-enter rounded-lg border border-blue-100 bg-white p-5 shadow-glow sm:p-7',
+        'screen-enter rounded-lg border border-blue-100/90 bg-white/95 p-5 shadow-card sm:p-7',
         className,
       )}
     >
@@ -104,60 +108,114 @@ function Card({ children, className }) {
   );
 }
 
-function StartPage({ onStart }) {
+function AppButton({ children, variant = 'primary', className, ...props }) {
+  const variants = {
+    primary:
+      'bg-astar-accent text-white shadow-lift hover:bg-[#d94f47] focus:ring-astar-accent/35 disabled:bg-slate-400',
+    secondary:
+      'bg-astar-secondary text-white shadow-lift hover:bg-astar-ink focus:ring-astar-secondary/35 disabled:bg-slate-400',
+    ghost:
+      'border border-blue-200 bg-white text-astar-navy hover:border-astar-secondary hover:bg-blue-50 focus:ring-astar-secondary/25 disabled:opacity-45',
+  };
+
   return (
-    <Card>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-          <img
-            src="/astar-logo.jpg"
-            alt="Astar"
-            className="h-16 w-fit rounded bg-white object-contain"
-          />
-          <div>
-            <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">
-              APL-handledarutbildning
-            </p>
-            <h1 className="text-3xl font-bold leading-tight text-astar-navy sm:text-4xl">
-              Tryggare APL på varje arbetsplats
-            </h1>
-          </div>
-        </div>
+    <button
+      className={cx(
+        'inline-flex min-h-12 items-center justify-center gap-2 rounded-lg px-5 py-3 font-bold transition focus:outline-none focus:ring-4 disabled:cursor-not-allowed',
+        variants[variant],
+        className,
+      )}
+      type="button"
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
 
-        <p className="text-lg leading-relaxed text-slate-800">
-          Den här korta utbildningen hjälper handledare att ge elever en tydlig, trygg och
-          lärorik APL-period. När alla arbetsplatser gör utbildningen får eleverna mer
-          likvärdigt stöd, oavsett bransch, plats eller handledare.
-        </p>
+function InfoPill({ icon: Icon, children }) {
+  return (
+    <div className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-astar-navy">
+      <Icon className="h-4 w-4 text-astar-accent" aria-hidden="true" />
+      {children}
+    </div>
+  );
+}
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          {[
-            'Tydlig start för eleven',
-            'Bättre handledning i vardagen',
-            'Bättre underlag till skolan',
-          ].map((item) => (
-            <div key={item} className="rounded-md border border-blue-100 bg-blue-50 p-4">
-              <Check className="mb-2 h-5 w-5 text-astar-secondary" aria-hidden="true" />
-              <p className="font-bold text-astar-navy">{item}</p>
+function StartPage({ onStart }) {
+  const benefits = [
+    {
+      title: 'Tydligare start',
+      text: 'Eleven vet vad som gäller från första dagen.',
+    },
+    {
+      title: 'Tryggare handledning',
+      text: 'Handledaren får enkla beteenden att använda direkt.',
+    },
+    {
+      title: 'Bättre underlag',
+      text: 'Skolan får tydligare bild av elevens utveckling.',
+    },
+  ];
+
+  return (
+    <Card className="overflow-hidden p-0">
+      <div className="grid min-w-0 gap-0 lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="min-w-0 space-y-7 p-6 sm:p-8">
+          <div className="space-y-5">
+            <img
+              src="/astar-logo.jpg"
+              alt="Astar"
+              className="h-14 w-fit rounded bg-white object-contain sm:h-16"
+            />
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">
+                APL-handledarutbildning
+              </p>
+              <h1 className="mt-2 max-w-xl text-[2.15rem] font-black leading-tight text-astar-navy sm:text-5xl lg:text-[2.85rem]">
+                Tryggare APL på varje arbetsplats
+              </h1>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="rounded-md border border-astar-light bg-slate-50 p-4 text-slate-800">
-          <p>
-            Utbildningen tar cirka 30 minuter. Du går igenom praktiska moment, svarar på
-            frågor och får ett certifikat när sluttestet är godkänt.
+          <p className="max-w-full break-words text-lg leading-relaxed text-slate-700 sm:max-w-2xl sm:text-xl">
+            Den här utbildningen hjälper handledare att ge elever en tydlig, trygg och
+            lärorik APL-period. När alla arbetsplatser gör utbildningen får eleverna ett
+            mer likvärdigt stöd, oavsett bransch, plats eller handledare.
           </p>
+
+          <div className="flex flex-wrap gap-3">
+            <InfoPill icon={Clock3}>30 minuter</InfoPill>
+            <InfoPill icon={BookOpen}>Praktiska scenarier</InfoPill>
+            <InfoPill icon={BadgeCheck}>Certifikat vid godkänt</InfoPill>
+          </div>
+
+          <AppButton onClick={onStart} className="w-full sm:w-auto">
+            Starta utbildningen
+            <ArrowRight className="h-5 w-5" aria-hidden="true" />
+          </AppButton>
         </div>
 
-        <button
-          className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] focus:outline-none focus:ring-2 focus:ring-astar-secondary"
-          type="button"
-          onClick={onStart}
-        >
-          Starta utbildningen
-          <ArrowRight className="h-5 w-5" aria-hidden="true" />
-        </button>
+        <aside className="min-w-0 border-t border-blue-100 bg-gradient-to-br from-blue-50 to-white p-6 sm:p-8 lg:border-l lg:border-t-0">
+          <div className="space-y-4">
+            <p className="break-words text-sm font-black uppercase leading-relaxed tracking-wide text-astar-secondary">
+              Varför alla arbetsplatser ska göra den
+            </p>
+            {benefits.map((item) => (
+              <div key={item.title} className="min-w-0 rounded-lg border border-blue-100 bg-white p-5 shadow-sm">
+                <Check className="mb-3 h-5 w-5 text-astar-accent" aria-hidden="true" />
+                <h2 className="text-lg font-black text-astar-navy">{item.title}</h2>
+                <p className="mt-1 leading-relaxed text-slate-700">{item.text}</p>
+              </div>
+            ))}
+            <div className="rounded-lg border border-astar-light/70 bg-white p-5 text-slate-700">
+              <p>
+                Upplägget är kort, konkret och byggt för vardagen: vad handledaren gör,
+                säger och följer upp när eleven är på plats.
+              </p>
+            </div>
+          </div>
+        </aside>
       </div>
     </Card>
   );
@@ -166,23 +224,30 @@ function StartPage({ onStart }) {
 function StepHeader({ section, title, children }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <span className="rounded-full bg-astar-secondary px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="rounded-lg bg-astar-secondary px-3 py-1.5 text-xs font-black uppercase tracking-wide text-white">
           {section}
         </span>
         {children}
       </div>
-      <h1 className="text-3xl font-bold leading-tight text-astar-navy sm:text-4xl">{title}</h1>
+      <h1 className="max-w-3xl text-3xl font-black leading-tight text-astar-navy sm:text-4xl">
+        {title}
+      </h1>
     </div>
   );
 }
 
 function BulletList({ bullets }) {
   return (
-    <ul className="grid gap-3 text-lg text-slate-800">
+    <ul className="grid gap-3 text-base text-slate-800 sm:text-lg">
       {bullets.map((bullet) => (
-        <li key={bullet} className="flex gap-3 rounded-md border border-blue-100 bg-blue-50/70 p-3">
-          <Check className="mt-1 h-5 w-5 shrink-0 text-astar-secondary" aria-hidden="true" />
+        <li
+          key={bullet}
+          className="flex gap-3 rounded-lg border border-blue-100 bg-blue-50/70 p-4"
+        >
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-astar-secondary shadow-sm">
+            <Check className="h-4 w-4" aria-hidden="true" />
+          </span>
           <span>{bullet}</span>
         </li>
       ))}
@@ -193,18 +258,18 @@ function BulletList({ bullets }) {
 function AnswerButton({ option, index, isSelected, isCorrect, wasAnswered, onClick }) {
   const stateClass = wasAnswered
     ? isCorrect
-      ? 'border-emerald-500 bg-emerald-50 text-emerald-950'
+      ? 'border-emerald-500 bg-emerald-50 text-emerald-950 ring-2 ring-emerald-100'
       : isSelected
-        ? 'border-astar-accent bg-red-50 text-red-950'
+        ? 'border-astar-accent bg-red-50 text-red-950 ring-2 ring-red-100'
         : 'border-blue-100 bg-white text-slate-700'
     : isSelected
-      ? 'border-astar-secondary bg-blue-50 text-astar-navy'
-      : 'border-blue-100 bg-white text-slate-800 hover:border-astar-secondary hover:bg-blue-50';
+      ? 'border-astar-secondary bg-blue-50 text-astar-navy ring-2 ring-blue-100'
+      : 'border-blue-100 bg-white text-slate-800 hover:-translate-y-0.5 hover:border-astar-secondary hover:bg-blue-50 hover:shadow-sm';
 
   return (
     <button
       className={cx(
-        'flex min-h-16 w-full items-center gap-3 rounded-md border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-astar-light',
+        'flex min-h-16 w-full items-center gap-3 rounded-lg border p-4 text-left transition focus:outline-none focus:ring-4 focus:ring-astar-light/50',
         stateClass,
       )}
       onClick={onClick}
@@ -223,7 +288,7 @@ function FeedbackBox({ isCorrect, message }) {
   return (
     <div
       className={cx(
-        'flex gap-3 rounded-md border p-4 text-base',
+        'flex gap-3 rounded-lg border p-4 text-base shadow-sm',
         isCorrect
           ? 'border-emerald-300 bg-emerald-50 text-emerald-950'
           : 'border-astar-accent bg-red-50 text-red-950',
@@ -231,11 +296,15 @@ function FeedbackBox({ isCorrect, message }) {
       role="status"
     >
       {isCorrect ? (
-        <Check className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
+          <Check className="h-4 w-4" aria-hidden="true" />
+        </span>
       ) : (
-        <X className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100">
+          <X className="h-4 w-4" aria-hidden="true" />
+        </span>
       )}
-      <p>{message}</p>
+      <p className="leading-relaxed">{message}</p>
     </div>
   );
 }
@@ -248,20 +317,22 @@ function QuizCard({ step, answer, onAnswer }) {
     <Card>
       <div className="space-y-6">
         <StepHeader section={step.section} title={step.title}>
-          <span className="text-sm font-semibold text-astar-secondary">60-90 sekunder</span>
+          <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-bold text-astar-secondary">
+            60-90 sekunder
+          </span>
         </StepHeader>
         {step.body && (
-          <p className="rounded-md border border-blue-100 bg-slate-50 p-4 text-lg leading-relaxed text-slate-800">
+          <p className="rounded-lg border border-blue-100 bg-slate-50 p-5 text-lg leading-relaxed text-slate-800">
             {step.body}
           </p>
         )}
         <BulletList bullets={step.bullets} />
         {step.extra && (
-          <p className="rounded-md border border-astar-light bg-blue-50 p-3 text-astar-navy">
+          <p className="rounded-lg border border-astar-light bg-blue-50 p-4 font-semibold text-astar-navy">
             {step.extra}
           </p>
         )}
-        <div className="space-y-4">
+        <div className="space-y-4 rounded-lg border border-blue-100 bg-white p-4 sm:p-5">
           <h2 className="text-xl font-bold text-astar-navy">{step.prompt}</h2>
           <div className="grid gap-3">
             {step.options.map((option, index) => (
@@ -299,14 +370,16 @@ function FinalTest({ answers, onAnswer }) {
     <Card>
       <div className="space-y-6">
         <StepHeader section="Sluttest" title="Visa vad du kan">
-          <span className="text-sm font-semibold text-astar-secondary">Minst 4 av 5 rätt</span>
+          <span className="rounded-lg bg-blue-50 px-3 py-1.5 text-sm font-bold text-astar-secondary">
+            Minst 4 av 5 rätt
+          </span>
         </StepHeader>
         <p className="text-lg text-slate-800">
           Svara på fem korta frågor. Du får resultatet direkt på nästa steg.
         </p>
-        <div className="space-y-5">
+        <div className="space-y-4">
           {finalQuestions.map((question, questionIndex) => (
-            <div key={question.id} className="rounded-lg border border-blue-100 bg-slate-50 p-4">
+            <div key={question.id} className="rounded-lg border border-blue-100 bg-slate-50 p-4 sm:p-5">
               <h2 className="mb-3 text-lg font-bold text-astar-navy">
                 {questionIndex + 1}. {question.prompt}
               </h2>
@@ -315,10 +388,10 @@ function FinalTest({ answers, onAnswer }) {
                   <button
                     key={option}
                     className={cx(
-                      'min-h-12 rounded-md border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-astar-light',
+                      'min-h-12 rounded-lg border px-4 py-3 text-left font-medium transition focus:outline-none focus:ring-4 focus:ring-astar-light/50',
                       answers[questionIndex] === optionIndex
-                        ? 'border-astar-secondary bg-blue-50 text-astar-navy'
-                        : 'border-blue-100 bg-white text-slate-800 hover:border-astar-secondary',
+                        ? 'border-astar-secondary bg-blue-50 text-astar-navy ring-2 ring-blue-100'
+                        : 'border-blue-100 bg-white text-slate-800 hover:border-astar-secondary hover:bg-blue-50',
                     )}
                     type="button"
                     onClick={() => onAnswer(questionIndex, optionIndex)}
@@ -337,7 +410,6 @@ function FinalTest({ answers, onAnswer }) {
 }
 
 function ResultCard({ score, passed, name, setName, date, onRestart }) {
-  const displayName = name.trim() || 'Namn ej angivet';
   const [isCreatingPdf, setIsCreatingPdf] = useState(false);
   const [pdfError, setPdfError] = useState('');
 
@@ -369,8 +441,8 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
         <p className="text-lg text-slate-800">
           Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
         </p>
-        <div className="rounded-lg border border-blue-100 bg-slate-50 p-5">
-          <label className="block text-sm font-bold uppercase tracking-wide text-astar-light" htmlFor="name">
+        <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-slate-50 to-white p-5">
+          <label className="block text-sm font-bold uppercase tracking-wide text-astar-secondary" htmlFor="name">
             Namn
           </label>
           <input
@@ -381,55 +453,21 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
             placeholder="Skriv ditt namn"
           />
           <dl className="mt-5 grid gap-3 sm:grid-cols-3">
-            <div>
+            <div className="rounded-lg bg-white p-3">
               <dt className="text-sm text-slate-600">Datum</dt>
               <dd className="font-bold text-astar-navy">{date}</dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-white p-3">
               <dt className="text-sm text-slate-600">Resultat</dt>
-              <dd className={cx('font-bold', passed ? 'text-emerald-200' : 'text-red-100')}>
+              <dd className={cx('font-bold', passed ? 'text-emerald-700' : 'text-red-700')}>
                 {passed ? 'Godkänd' : 'Ej godkänd'}
               </dd>
             </div>
-            <div>
+            <div className="rounded-lg bg-white p-3">
               <dt className="text-sm text-slate-600">Poäng</dt>
               <dd className="font-bold text-astar-navy">{score} av 5</dd>
             </div>
           </dl>
-        </div>
-        <div className="certificate-print hidden">
-          <div className="certificate-shell">
-            <div className="certificate-mark" aria-hidden="true" />
-            <header className="certificate-header">
-              <img src="/astar-logo.jpg" alt="Astar" className="certificate-logo" />
-              <p className="certificate-kicker">Certifikat</p>
-            </header>
-            <main className="certificate-body">
-              <h1>APL-handledare – Astar</h1>
-              <p className="certificate-lead">
-                Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
-              </p>
-              <div className="certificate-name">{displayName}</div>
-              <dl className="certificate-meta">
-                <div>
-                  <dt>Datum</dt>
-                  <dd>{date}</dd>
-                </div>
-                <div>
-                  <dt>Resultat</dt>
-                  <dd>{passed ? 'Godkänd' : 'Ej godkänd'}</dd>
-                </div>
-                <div>
-                  <dt>Poäng</dt>
-                  <dd>{score} av 5</dd>
-                </div>
-              </dl>
-            </main>
-            <footer className="certificate-footer">
-              <span>Astar</span>
-              <span>APL-handledarutbildning</span>
-            </footer>
-          </div>
         </div>
         {!passed && (
           <FeedbackBox
@@ -439,23 +477,19 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
         )}
         <div className="no-print flex flex-wrap gap-3">
           {passed && (
-            <button
-              className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-secondary px-5 py-3 font-bold text-white transition hover:bg-astar-ink focus:outline-none focus:ring-2 focus:ring-astar-light"
-              type="button"
+            <AppButton
+              variant="secondary"
               onClick={handlePrintCertificate}
               disabled={isCreatingPdf}
             >
+              <Printer className="h-5 w-5" aria-hidden="true" />
               {isCreatingPdf ? 'Skapar certifikat...' : 'Skriv ut certifikat'}
-            </button>
+            </AppButton>
           )}
-          <button
-            className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] focus:outline-none focus:ring-2 focus:ring-astar-light"
-            type="button"
-            onClick={onRestart}
-          >
+          <AppButton onClick={onRestart}>
             <RotateCcw className="h-5 w-5" aria-hidden="true" />
             Starta om
-          </button>
+          </AppButton>
         </div>
         {pdfError && (
           <p className="no-print rounded-md border border-astar-accent bg-red-50 p-3 text-red-950">
@@ -470,24 +504,14 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
 function Navigation({ canGoBack, canGoNext, isFinalStep, onBack, onNext }) {
   return (
     <nav className="flex items-center justify-between gap-3" aria-label="Navigering">
-      <button
-        className="inline-flex min-h-12 items-center gap-2 rounded-md border border-blue-200 bg-white px-4 py-3 font-bold text-astar-navy transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-40"
-        type="button"
-        onClick={onBack}
-        disabled={!canGoBack}
-      >
+      <AppButton variant="ghost" onClick={onBack} disabled={!canGoBack}>
         <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         Tillbaka
-      </button>
-      <button
-        className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] disabled:cursor-not-allowed disabled:bg-slate-600 disabled:text-slate-300"
-        type="button"
-        onClick={onNext}
-        disabled={!canGoNext}
-      >
+      </AppButton>
+      <AppButton onClick={onNext} disabled={!canGoNext}>
         {isFinalStep ? 'Visa certifikat' : 'Gå vidare'}
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
-      </button>
+      </AppButton>
     </nav>
   );
 }
@@ -586,22 +610,26 @@ export default function App() {
   const currentCourseStep = currentStep >= 0 ? courseSteps[currentStep] : null;
 
   return (
-    <main className="min-h-screen px-4 py-5 sm:px-6 lg:py-8">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-5">
-        <header className="sticky top-0 z-10 rounded-lg border border-blue-100 bg-white/95 p-4 shadow-glow backdrop-blur">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
+    <main className="min-h-screen overflow-x-hidden px-4 py-4 sm:px-6 lg:py-8">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-5">
+        <header className="sticky top-3 z-10 rounded-lg border border-blue-100 bg-white/95 p-4 shadow-card backdrop-blur sm:p-5">
+          <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
               <img
                 src="/astar-logo.jpg"
                 alt="Astar"
-                className="h-12 w-auto rounded bg-white object-contain sm:h-14"
+                className="h-10 w-fit rounded bg-white object-contain sm:h-14"
               />
-              <div>
-                <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">APL</p>
-                <p className="text-xl font-bold text-astar-navy">30-minuters handledarutbildning</p>
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-wide text-astar-accent sm:text-sm">
+                  APL
+                </p>
+                <p className="max-w-full break-words text-lg font-black leading-tight text-astar-navy sm:text-xl">
+                  30-minuters handledarutbildning
+                </p>
               </div>
             </div>
-            <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm font-semibold text-astar-navy">
+            <div className="flex w-fit items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-astar-navy">
               <ClipboardCheck className="h-4 w-4 text-astar-accent" aria-hidden="true" />
               {totalEstimatedMinutes} min
             </div>
@@ -663,7 +691,7 @@ export default function App() {
         </footer>
 
         <button
-          className="no-print fixed bottom-4 right-4 z-20 rounded-md border border-astar-accent bg-white px-3 py-2 text-xs font-bold text-astar-accent shadow-glow transition hover:bg-red-50"
+          className="no-print fixed bottom-4 right-4 z-20 hidden rounded-md border border-astar-accent bg-white px-3 py-2 text-xs font-bold text-astar-accent shadow-glow transition hover:bg-red-50 sm:block"
           type="button"
           onClick={handleSkipToPassed}
         >
