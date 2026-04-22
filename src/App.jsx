@@ -337,6 +337,8 @@ function FinalTest({ answers, onAnswer }) {
 }
 
 function ResultCard({ score, passed, name, setName, date, onRestart }) {
+  const displayName = name.trim() || 'Namn ej angivet';
+
   return (
     <Card className="overflow-hidden">
       <div className="space-y-6">
@@ -346,16 +348,7 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
         <p className="text-lg text-slate-800">
           Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
         </p>
-        <div className="certificate-print rounded-lg border border-blue-100 bg-slate-50 p-5">
-          <div className="mb-5 hidden print:block">
-            <img src="/astar-logo.jpg" alt="Astar" className="h-16 w-auto" />
-            <h1 className="mt-8 text-3xl font-bold text-astar-navy">
-              APL-handledare – Astar
-            </h1>
-            <p className="mt-3 text-lg text-slate-800">
-              Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
-            </p>
-          </div>
+        <div className="rounded-lg border border-blue-100 bg-slate-50 p-5">
           <label className="block text-sm font-bold uppercase tracking-wide text-astar-light" htmlFor="name">
             Namn
           </label>
@@ -382,6 +375,40 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
               <dd className="font-bold text-astar-navy">{score} av 5</dd>
             </div>
           </dl>
+        </div>
+        <div className="certificate-print hidden">
+          <div className="certificate-shell">
+            <div className="certificate-mark" aria-hidden="true" />
+            <header className="certificate-header">
+              <img src="/astar-logo.jpg" alt="Astar" className="certificate-logo" />
+              <p className="certificate-kicker">Certifikat</p>
+            </header>
+            <main className="certificate-body">
+              <h1>APL-handledare – Astar</h1>
+              <p className="certificate-lead">
+                Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
+              </p>
+              <div className="certificate-name">{displayName}</div>
+              <dl className="certificate-meta">
+                <div>
+                  <dt>Datum</dt>
+                  <dd>{date}</dd>
+                </div>
+                <div>
+                  <dt>Resultat</dt>
+                  <dd>{passed ? 'Godkänd' : 'Ej godkänd'}</dd>
+                </div>
+                <div>
+                  <dt>Poäng</dt>
+                  <dd>{score} av 5</dd>
+                </div>
+              </dl>
+            </main>
+            <footer className="certificate-footer">
+              <span>Astar</span>
+              <span>APL-handledarutbildning</span>
+            </footer>
+          </div>
         </div>
         {!passed && (
           <FeedbackBox
@@ -522,6 +549,13 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function handleSkipToPassed() {
+    setCurrentStep(CERTIFICATE_STEP);
+    setFinalAnswers(finalQuestions.map((question) => question.correctIndex));
+    setCertificateDate(getToday());
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   const currentCourseStep = currentStep >= 0 ? courseSteps[currentStep] : null;
 
   return (
@@ -600,6 +634,14 @@ export default function App() {
           <Sparkles className="h-4 w-4 text-astar-accent" aria-hidden="true" />
           Progress och resultat sparas automatiskt i den här webbläsaren.
         </footer>
+
+        <button
+          className="no-print fixed bottom-4 right-4 z-20 rounded-md border border-astar-accent bg-white px-3 py-2 text-xs font-bold text-astar-accent shadow-glow transition hover:bg-red-50"
+          type="button"
+          onClick={handleSkipToPassed}
+        >
+          Test: godkänt
+        </button>
       </div>
     </main>
   );
