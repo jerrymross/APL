@@ -8,3 +8,7 @@ vite.log
 vite-error.log
 preview.log
 preview-error.log
+certificate-test.pdf
+certificate-test.png
+certificate-render.png
+verification/

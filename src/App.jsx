@@ -338,6 +338,27 @@ function FinalTest({ answers, onAnswer }) {
 
 function ResultCard({ score, passed, name, setName, date, onRestart }) {
   const displayName = name.trim() || 'Namn ej angivet';
+  const [isCreatingPdf, setIsCreatingPdf] = useState(false);
+  const [pdfError, setPdfError] = useState('');
+
+  async function handlePrintCertificate() {
+    setPdfError('');
+    setIsCreatingPdf(true);
+
+    try {
+      const { openCertificatePdf } = await import('./certificatePdf.js');
+      await openCertificatePdf({
+        name,
+        date,
+        score,
+        logoSrc: '/astar-logo.jpg',
+      });
+    } catch {
+      setPdfError('Certifikatet kunde inte skapas. Försök igen.');
+    } finally {
+      setIsCreatingPdf(false);
+    }
+  }
 
   return (
     <Card className="overflow-hidden">
@@ -421,9 +442,10 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
             <button
               className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-secondary px-5 py-3 font-bold text-white transition hover:bg-astar-ink focus:outline-none focus:ring-2 focus:ring-astar-light"
               type="button"
-              onClick={() => window.print()}
+              onClick={handlePrintCertificate}
+              disabled={isCreatingPdf}
             >
-              Skriv ut certifikat
+              {isCreatingPdf ? 'Skapar certifikat...' : 'Skriv ut certifikat'}
             </button>
           )}
           <button
@@ -435,6 +457,11 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
             Starta om
           </button>
         </div>
+        {pdfError && (
+          <p className="no-print rounded-md border border-astar-accent bg-red-50 p-3 text-red-950">
+            {pdfError}
+          </p>
+        )}
       </div>
     </Card>
   );
