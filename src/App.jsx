@@ -17,7 +17,32 @@ const CERTIFICATE_STEP = courseSteps.length + 1;
 function loadSavedState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : null;
+    const parsed = saved ? JSON.parse(saved) : null;
+    if (!parsed || typeof parsed !== 'object') return null;
+
+    const maxStep = CERTIFICATE_STEP;
+    const currentStep = Number.isInteger(parsed.currentStep)
+      ? Math.min(Math.max(parsed.currentStep, 0), maxStep)
+      : 0;
+    const courseAnswers = Array.isArray(parsed.courseAnswers)
+      ? courseSteps.map((_, index) =>
+          Number.isInteger(parsed.courseAnswers[index]) ? parsed.courseAnswers[index] : null,
+        )
+      : Array(courseSteps.length).fill(null);
+    const finalAnswers = Array.isArray(parsed.finalAnswers)
+      ? finalQuestions.map((_, index) =>
+          Number.isInteger(parsed.finalAnswers[index]) ? parsed.finalAnswers[index] : null,
+        )
+      : Array(finalQuestions.length).fill(null);
+
+    return {
+      currentStep,
+      courseAnswers,
+      finalAnswers,
+      name: typeof parsed.name === 'string' ? parsed.name : '',
+      certificateDate:
+        typeof parsed.certificateDate === 'string' ? parsed.certificateDate : getToday(),
+    };
   } catch {
     return null;
   }
