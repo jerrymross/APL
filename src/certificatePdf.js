@@ -145,12 +145,6 @@ async function createCertificateImage({ name, date, score, logoSrc }) {
   ctx.fill();
   ctx.stroke();
 
-  ctx.strokeStyle = 'rgba(235, 92, 82, 0.9)';
-  ctx.lineWidth = px(2);
-  ctx.beginPath();
-  ctx.arc(px(178), px(247), px(32), 0, Math.PI * 2);
-  ctx.stroke();
-
   ctx.drawImage(logo, px(27), px(29), px(58), px(15));
 
   ctx.fillStyle = rgb(ASTAR_RED);
