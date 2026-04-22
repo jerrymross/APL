@@ -144,7 +144,7 @@ function AnswerButton({ option, index, isSelected, isCorrect, wasAnswered, onCli
       )}
       onClick={onClick}
       type="button"
-      disabled={wasAnswered}
+      aria-pressed={isSelected}
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-bold">
         {index + 1}
@@ -346,7 +346,7 @@ function Navigation({ canGoBack, canGoNext, isFinalStep, onBack, onNext }) {
         onClick={onNext}
         disabled={!canGoNext}
       >
-        {isFinalStep ? 'Visa certifikat' : 'Nästa'}
+        {isFinalStep ? 'Visa certifikat' : 'Gå vidare'}
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </button>
     </nav>
