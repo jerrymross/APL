@@ -13,6 +13,7 @@ import { courseSteps, finalQuestions, totalEstimatedMinutes } from './courseData
 
 const STORAGE_KEY = 'astar-apl-handledarutbildning-v1';
 const CERTIFICATE_STEP = courseSteps.length + 1;
+const START_STEP = -1;
 
 function loadSavedState() {
   try {
@@ -28,8 +29,8 @@ function loadSavedState() {
 
     const maxStep = CERTIFICATE_STEP;
     const currentStep = Number.isInteger(parsed.currentStep)
-      ? Math.min(Math.max(parsed.currentStep, 0), maxStep)
-      : 0;
+      ? Math.min(Math.max(parsed.currentStep, START_STEP), maxStep)
+      : START_STEP;
     const courseAnswers = Array.isArray(parsed.courseAnswers)
       ? courseSteps.map((_, index) =>
           Number.isInteger(parsed.courseAnswers[index]) ? parsed.courseAnswers[index] : null,
@@ -67,12 +68,17 @@ function cx(...classes) {
 }
 
 function ProgressBar({ currentStep, totalSteps }) {
-  const percent = Math.round(((currentStep + 1) / totalSteps) * 100);
+  const displayStep = currentStep === START_STEP ? 0 : currentStep + 1;
+  const percent = currentStep === START_STEP ? 0 : Math.round((displayStep / totalSteps) * 100);
 
   return (
     <div aria-label="Progress" className="space-y-2">
-      <div className="flex items-center justify-between text-sm text-slate-200">
-        <span>Steg {Math.min(currentStep + 1, totalSteps)} av {totalSteps}</span>
+      <div className="flex items-center justify-between text-sm font-semibold text-astar-navy">
+        <span>
+          {currentStep === START_STEP
+            ? 'Start'
+            : `Steg ${Math.min(displayStep, totalSteps)} av ${totalSteps}`}
+        </span>
         <span>{percent}%</span>
       </div>
       <div className="h-3 overflow-hidden rounded-full bg-white/10">
@@ -95,6 +101,65 @@ function Card({ children, className }) {
     >
       {children}
     </section>
+  );
+}
+
+function StartPage({ onStart }) {
+  return (
+    <Card>
+      <div className="space-y-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+          <img
+            src="/astar-logo.jpg"
+            alt="Astar"
+            className="h-16 w-fit rounded bg-white object-contain"
+          />
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">
+              APL-handledarutbildning
+            </p>
+            <h1 className="text-3xl font-bold leading-tight text-astar-navy sm:text-4xl">
+              Tryggare APL på varje arbetsplats
+            </h1>
+          </div>
+        </div>
+
+        <p className="text-lg leading-relaxed text-slate-800">
+          Den här korta utbildningen hjälper handledare att ge elever en tydlig, trygg och
+          lärorik APL-period. När alla arbetsplatser gör utbildningen får eleverna mer
+          likvärdigt stöd, oavsett bransch, plats eller handledare.
+        </p>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            'Tydlig start för eleven',
+            'Bättre handledning i vardagen',
+            'Bättre underlag till skolan',
+          ].map((item) => (
+            <div key={item} className="rounded-md border border-blue-100 bg-blue-50 p-4">
+              <Check className="mb-2 h-5 w-5 text-astar-secondary" aria-hidden="true" />
+              <p className="font-bold text-astar-navy">{item}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-md border border-astar-light bg-slate-50 p-4 text-slate-800">
+          <p>
+            Utbildningen tar cirka 30 minuter. Du går igenom praktiska moment, svarar på
+            frågor och får ett certifikat när sluttestet är godkänt.
+          </p>
+        </div>
+
+        <button
+          className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] focus:outline-none focus:ring-2 focus:ring-astar-secondary"
+          type="button"
+          onClick={onStart}
+        >
+          Starta utbildningen
+          <ArrowRight className="h-5 w-5" aria-hidden="true" />
+        </button>
+      </div>
+    </Card>
   );
 }
 
@@ -281,7 +346,16 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
         <p className="text-lg text-slate-800">
           Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
         </p>
-        <div className="rounded-lg border border-blue-100 bg-slate-50 p-5">
+        <div className="certificate-print rounded-lg border border-blue-100 bg-slate-50 p-5">
+          <div className="mb-5 hidden print:block">
+            <img src="/astar-logo.jpg" alt="Astar" className="h-16 w-auto" />
+            <h1 className="mt-8 text-3xl font-bold text-astar-navy">
+              APL-handledare – Astar
+            </h1>
+            <p className="mt-3 text-lg text-slate-800">
+              Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
+            </p>
+          </div>
           <label className="block text-sm font-bold uppercase tracking-wide text-astar-light" htmlFor="name">
             Namn
           </label>
@@ -315,14 +389,25 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
             message="Du behöver minst 4 rätt. Starta om och gör utbildningen igen."
           />
         )}
-        <button
-          className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] focus:outline-none focus:ring-2 focus:ring-astar-light"
-          type="button"
-          onClick={onRestart}
-        >
-          <RotateCcw className="h-5 w-5" aria-hidden="true" />
-          Starta om
-        </button>
+        <div className="no-print flex flex-wrap gap-3">
+          {passed && (
+            <button
+              className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-secondary px-5 py-3 font-bold text-white transition hover:bg-astar-ink focus:outline-none focus:ring-2 focus:ring-astar-light"
+              type="button"
+              onClick={() => window.print()}
+            >
+              Skriv ut certifikat
+            </button>
+          )}
+          <button
+            className="inline-flex min-h-12 items-center gap-2 rounded-md bg-astar-accent px-5 py-3 font-bold text-white transition hover:bg-[#d94f47] focus:outline-none focus:ring-2 focus:ring-astar-light"
+            type="button"
+            onClick={onRestart}
+          >
+            <RotateCcw className="h-5 w-5" aria-hidden="true" />
+            Starta om
+          </button>
+        </div>
       </div>
     </Card>
   );
@@ -355,7 +440,7 @@ function Navigation({ canGoBack, canGoNext, isFinalStep, onBack, onNext }) {
 
 export default function App() {
   const savedState = useMemo(loadSavedState, []);
-  const [currentStep, setCurrentStep] = useState(savedState?.currentStep ?? 0);
+  const [currentStep, setCurrentStep] = useState(savedState?.currentStep ?? START_STEP);
   const [courseAnswers, setCourseAnswers] = useState(
     savedState?.courseAnswers ?? Array(courseSteps.length).fill(null),
   );
@@ -374,6 +459,7 @@ export default function App() {
   const isFinalTest = currentStep === courseSteps.length;
   const isCertificate = currentStep === CERTIFICATE_STEP;
   const allFinalAnswered = finalAnswers.every(Number.isInteger);
+  const isStart = currentStep === START_STEP;
   const canGoNext = isCertificate
     ? false
     : isFinalTest
@@ -416,6 +502,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function handleStart() {
+    setCurrentStep(0);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function handleBack() {
     setCurrentStep((step) => Math.max(step - 1, 0));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -423,7 +514,7 @@ export default function App() {
 
   function handleRestart() {
     localStorage.removeItem(STORAGE_KEY);
-    setCurrentStep(0);
+    setCurrentStep(START_STEP);
     setCourseAnswers(Array(courseSteps.length).fill(null));
     setFinalAnswers(Array(finalQuestions.length).fill(null));
     setName('');
@@ -431,7 +522,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const currentCourseStep = courseSteps[currentStep];
+  const currentCourseStep = currentStep >= 0 ? courseSteps[currentStep] : null;
 
   return (
     <main className="min-h-screen px-4 py-5 sm:px-6 lg:py-8">
@@ -456,6 +547,8 @@ export default function App() {
           </div>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
         </header>
+
+        {isStart && <StartPage onStart={handleStart} />}
 
         {currentCourseStep?.type === 'quiz' && (
           <QuizCard
@@ -493,7 +586,7 @@ export default function App() {
           />
         )}
 
-        {!isCertificate && (
+        {!isStart && !isCertificate && (
           <Navigation
             canGoBack={currentStep > 0}
             canGoNext={canGoNext}

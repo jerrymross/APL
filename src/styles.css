@@ -49,3 +49,33 @@ input {
     animation: none;
   }
 }
+
+@media print {
+  body {
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .certificate-print,
+  .certificate-print * {
+    visibility: visible;
+  }
+
+  .certificate-print {
+    position: fixed;
+    inset: 24mm;
+    border: 2px solid #1559c7 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}
