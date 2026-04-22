@@ -113,6 +113,102 @@ export const courseSteps = [
       incorrect: 'Bedömning handlar om helhet, inte en enskild faktor.',
     },
   },
+  {
+    id: 'communication',
+    type: 'quiz',
+    section: 'Kommunikation',
+    title: 'Prata tydligt i vardagen',
+    body:
+      'Eleven behöver förstå vad som ska göras, varför det är viktigt och när uppgiften är klar. Korta avstämningar under dagen gör att små frågor inte växer till stora problem.',
+    bullets: [
+      'Säg vad som ska göras först',
+      'Kontrollera att eleven har förstått',
+      'Stäm av innan dagen är slut',
+    ],
+    prompt: 'Vad är bäst när du ger en ny uppgift?',
+    options: [
+      'Ge uppgiften snabbt och gå därifrån',
+      'Förklara uppgiften och kontrollera att eleven förstått',
+      'Låta eleven gissa hur arbetet ska göras',
+    ],
+    correctIndex: 1,
+    feedback: {
+      correct: 'Tydliga instruktioner och avstämning minskar missförstånd.',
+      incorrect: 'Eleven behöver veta både vad som ska göras och hur starten ska se ut.',
+    },
+  },
+  {
+    id: 'safety',
+    type: 'scenario',
+    section: 'Säkerhet',
+    title: 'Säkerhet går först',
+    body:
+      'Säkerhet är alltid en del av handledningen. Eleven ska veta vilka risker som finns, vilka rutiner som gäller och när hen ska fråga innan arbetet fortsätter.',
+    bullets: [
+      'Visa risker innan uppgiften startar',
+      'Följ arbetsplatsens rutiner',
+      'Stoppa arbetet vid osäkerhet',
+    ],
+    prompt: 'Eleven är osäker på en säkerhetsrutin. Vad gör du?',
+    options: [
+      'Ber eleven fortsätta försiktigt',
+      'Stoppar och går igenom rutinen igen',
+      'Säger att eleven får fråga någon annan senare',
+    ],
+    correctIndex: 1,
+    feedback: {
+      correct: 'Vid osäkerhet ska arbetet stoppas och rutinen förklaras igen.',
+      incorrect: 'Säkerhet ska hanteras direkt, inte skjutas upp.',
+    },
+  },
+  {
+    id: 'support',
+    type: 'scenario',
+    section: 'Stöd',
+    title: 'När eleven fastnar',
+    body:
+      'Alla elever fastnar ibland. Din uppgift är att hjälpa eleven vidare utan att ta över hela arbetet. Ställ frågor, visa nästa steg och låt eleven prova igen.',
+    bullets: [
+      'Ställ en enkel fråga',
+      'Visa nästa steg',
+      'Låt eleven försöka igen',
+    ],
+    prompt: 'Eleven säger: “Jag kan inte det här.” Vad gör du?',
+    options: [
+      'Tar över uppgiften direkt',
+      'Visar nästa steg och låter eleven prova igen',
+      'Säger att uppgiften är för svår',
+    ],
+    correctIndex: 1,
+    feedback: {
+      correct: 'Stöd ska hjälpa eleven att komma vidare och bli mer självständig.',
+      incorrect: 'Att ta över eller ge upp minskar elevens möjlighet att utvecklas.',
+    },
+  },
+  {
+    id: 'school-contact',
+    type: 'quiz',
+    section: 'Kontakt med skolan',
+    title: 'Säg till i tid',
+    body:
+      'Handledaren är inte ensam. Om något inte fungerar, om eleven ofta är frånvarande eller om du ser att målen inte nås, ska skolan få veta det i tid.',
+    bullets: [
+      'Ta problem tidigt',
+      'Dokumentera konkreta exempel',
+      'Kontakta skolan vid oro',
+    ],
+    prompt: 'När bör du kontakta skolan?',
+    options: [
+      'När APL-perioden är helt slut',
+      'Tidigt om frånvaro, oro eller problem uppstår',
+      'Bara om eleven själv ber om det',
+    ],
+    correctIndex: 1,
+    feedback: {
+      correct: 'Tidiga signaler gör att skolan kan stötta eleven och arbetsplatsen.',
+      incorrect: 'Vänta inte till slutet om något inte fungerar.',
+    },
+  },
 ];
 
 export const finalQuestions = [
