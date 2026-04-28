@@ -236,11 +236,6 @@ function StartPage({ onStart }) {
       <div className="grid min-w-0 gap-0 lg:grid-cols-[1.05fr_0.95fr]">
         <div className="min-w-0 space-y-7 p-6 sm:p-8">
           <div className="space-y-5">
-            <img
-              src="/astar-logo.jpg"
-              alt="Astar"
-              className="h-14 w-fit rounded bg-white object-contain sm:h-16"
-            />
             <div>
               <p className="text-sm font-bold uppercase tracking-wide text-astar-accent">
                 APL-handledarutbildning
