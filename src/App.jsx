@@ -9,7 +9,6 @@ import {
   Check,
   ChevronDown,
   ClipboardCheck,
-  Clock3,
   LayoutDashboard,
   MapPinned,
   Printer,
@@ -19,7 +18,7 @@ import {
   UserRound,
   X,
 } from 'lucide-react';
-import { courseSteps, finalQuestions, totalEstimatedMinutes } from './courseData.js';
+import { courseSteps, finalQuestions } from './courseData.js';
 import { countyOptions } from './locationData.js';
 
 const STORAGE_KEY = 'astar-apl-handledarutbildning-v1';
@@ -337,7 +336,6 @@ function StartPage({ onStart }) {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <InfoPill icon={Clock3}>30 minuter</InfoPill>
             <InfoPill icon={BookOpen}>Praktiska scenarier</InfoPill>
             <InfoPill icon={BadgeCheck}>Certifikat vid godkänt</InfoPill>
           </div>
@@ -1049,17 +1047,17 @@ export default function App() {
                 className="h-10 w-fit rounded bg-white object-contain sm:h-14"
               />
               <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-wide text-astar-accent sm:text-sm">
-                  APL
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-astar-accent sm:text-sm">
+                  APL för handledare
                 </p>
-                <p className="max-w-full break-words text-lg font-black leading-tight text-astar-navy sm:text-xl">
-                  30-minuters handledarutbildning
+                <p className="max-w-full break-words text-xl font-black leading-tight text-astar-navy sm:text-2xl">
+                  Handledarutbildning för trygga arbetsplatser
                 </p>
               </div>
             </div>
             <div className="flex w-fit items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-astar-navy">
               <ClipboardCheck className="h-4 w-4 text-astar-accent" aria-hidden="true" />
-              {totalEstimatedMinutes} min
+              Astar
             </div>
           </div>
           <ProgressBar currentStep={currentStep} totalSteps={totalSteps} />
