@@ -117,8 +117,19 @@ function fitText(ctx, text, maxWidth, startSize, minSize, fontWeight = 700) {
   return minSize;
 }
 
-async function createCertificateImage({ name, date, score, logoSrc }) {
+async function createCertificateImage({
+  name,
+  company,
+  county,
+  city,
+  date,
+  score,
+  logoSrc,
+}) {
   const displayName = name?.trim() || 'Namn ej angivet';
+  const displayCompany = company?.trim() || '-';
+  const displayCounty = county?.trim() || '-';
+  const displayCity = city?.trim() || '-';
   const logo = await loadCanvasImage(logoSrc);
   const { canvas, ctx } = await createCanvasSurface(CANVAS_WIDTH, CANVAS_HEIGHT);
 
@@ -159,9 +170,14 @@ async function createCertificateImage({ name, date, score, logoSrc }) {
 
   ctx.fillStyle = rgb(TEXT);
   ctx.font = `400 ${px(4)}px Arial, "Segoe UI", sans-serif`;
-  const lead =
-    'Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.';
-  drawWrappedText(ctx, lead, px(105), px(96), px(126), px(5.7));
+  drawWrappedText(
+    ctx,
+    'Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.',
+    px(105),
+    px(96),
+    px(126),
+    px(5.7),
+  );
 
   ctx.fillStyle = rgb(MUTED);
   ctx.font = `700 ${px(3)}px Arial, "Segoe UI", sans-serif`;
@@ -180,11 +196,15 @@ async function createCertificateImage({ name, date, score, logoSrc }) {
   ctx.stroke();
 
   const rows = [
+    ['FÖRETAG', displayCompany],
+    ['LÄN', displayCounty],
+    ['STAD', displayCity],
     ['DATUM', date],
     ['RESULTAT', 'Godkänd'],
     ['POÄNG', `${score} av 5`],
   ];
-  let rowY = px(171);
+
+  let rowY = px(164);
   rows.forEach(([label, value]) => {
     ctx.strokeStyle = '#d7e3f4';
     ctx.lineWidth = px(0.2);
@@ -201,7 +221,7 @@ async function createCertificateImage({ name, date, score, logoSrc }) {
     ctx.fillStyle = rgb(ASTAR_DARK);
     ctx.font = `700 ${px(4.4)}px Arial, "Segoe UI", sans-serif`;
     ctx.fillText(value, px(98), rowY);
-    rowY += px(21);
+    rowY += px(16);
   });
 
   ctx.fillStyle = rgb(MUTED);
@@ -215,6 +235,9 @@ async function createCertificateImage({ name, date, score, logoSrc }) {
 
 export async function createCertificatePdf({
   name,
+  company,
+  county,
+  city,
   date,
   score,
   logoSrc = '/astar-logo.jpg',
@@ -222,6 +245,9 @@ export async function createCertificatePdf({
 }) {
   const certificateImage = await createCertificateImage({
     name,
+    company,
+    county,
+    city,
     date,
     score,
     logoSrc,

@@ -5,19 +5,85 @@ import {
   Award,
   BadgeCheck,
   BookOpen,
+  Building2,
   Check,
+  ChevronDown,
   ClipboardCheck,
   Clock3,
+  LayoutDashboard,
+  MapPinned,
   Printer,
   RotateCcw,
+  Search,
   Sparkles,
+  UserRound,
   X,
 } from 'lucide-react';
 import { courseSteps, finalQuestions, totalEstimatedMinutes } from './courseData.js';
+import { countyOptions } from './locationData.js';
 
 const STORAGE_KEY = 'astar-apl-handledarutbildning-v1';
+const COMPLETIONS_KEY = 'astar-apl-handledarutbildning-completions-v1';
 const CERTIFICATE_STEP = courseSteps.length + 1;
 const START_STEP = -1;
+
+function getToday() {
+  return new Intl.DateTimeFormat('sv-SE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date());
+}
+
+function cx(...classes) {
+  return classes.filter(Boolean).join(' ');
+}
+
+function getCompletionId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  return `apl-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function loadCompletions() {
+  try {
+    const saved = localStorage.getItem(COMPLETIONS_KEY);
+    const parsed = saved ? JSON.parse(saved) : [];
+    return Array.isArray(parsed) ? parsed.filter((item) => item && typeof item === 'object') : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCompletionRecord(record) {
+  if (!record.id) return;
+
+  const currentRecords = loadCompletions();
+  const nextRecords = [...currentRecords];
+  const recordIndex = nextRecords.findIndex((item) => item.id === record.id);
+
+  if (recordIndex >= 0) {
+    nextRecords[recordIndex] = {
+      ...nextRecords[recordIndex],
+      ...record,
+      updatedAt: new Date().toISOString(),
+    };
+  } else {
+    nextRecords.unshift({
+      ...record,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  localStorage.setItem(COMPLETIONS_KEY, JSON.stringify(nextRecords));
+}
+
+function getCitiesForCounty(county) {
+  return countyOptions.find((item) => item.name === county)?.cities ?? [];
+}
 
 function loadSavedState() {
   try {
@@ -50,25 +116,19 @@ function loadSavedState() {
       currentStep,
       courseAnswers,
       finalAnswers,
-      name: typeof parsed.name === 'string' ? parsed.name : '',
+      participant: {
+        name: typeof parsed.name === 'string' ? parsed.name : '',
+        company: typeof parsed.company === 'string' ? parsed.company : '',
+        county: typeof parsed.county === 'string' ? parsed.county : '',
+        city: typeof parsed.city === 'string' ? parsed.city : '',
+      },
+      completionId: typeof parsed.completionId === 'string' ? parsed.completionId : '',
       certificateDate:
         typeof parsed.certificateDate === 'string' ? parsed.certificateDate : getToday(),
     };
   } catch {
     return null;
   }
-}
-
-function getToday() {
-  return new Intl.DateTimeFormat('sv-SE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date());
-}
-
-function cx(...classes) {
-  return classes.filter(Boolean).join(' ');
 }
 
 function ProgressBar({ currentStep, totalSteps }) {
@@ -142,6 +202,19 @@ function InfoPill({ icon: Icon, children }) {
   );
 }
 
+function FormField({ label, htmlFor, icon: Icon, required = false, children }) {
+  return (
+    <label className="block space-y-2" htmlFor={htmlFor}>
+      <span className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-astar-secondary">
+        {Icon ? <Icon className="h-4 w-4 text-astar-accent" aria-hidden="true" /> : null}
+        {label}
+        {required ? <span className="text-astar-accent">*</span> : null}
+      </span>
+      {children}
+    </label>
+  );
+}
+
 function StartPage({ onStart }) {
   const benefits = [
     {
@@ -179,9 +252,9 @@ function StartPage({ onStart }) {
           </div>
 
           <p className="max-w-full break-words text-lg leading-relaxed text-slate-700 sm:max-w-2xl sm:text-xl">
-            Den här utbildningen hjälper handledare att ge elever en tydlig, trygg och
-            lärorik APL-period. När alla arbetsplatser gör utbildningen får eleverna ett
-            mer likvärdigt stöd, oavsett bransch, plats eller handledare.
+            Den här utbildningen hjälper handledare att ge elever en tydlig, trygg och lärorik
+            APL-period. När alla arbetsplatser gör utbildningen får eleverna ett mer likvärdigt
+            stöd, oavsett bransch, plats eller handledare.
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -210,8 +283,8 @@ function StartPage({ onStart }) {
             ))}
             <div className="rounded-lg border border-astar-light/70 bg-white p-5 text-slate-700">
               <p>
-                Upplägget är kort, konkret och byggt för vardagen: vad handledaren gör,
-                säger och följer upp när eleven är på plats.
+                Upplägget är kort, konkret och byggt för vardagen: vad handledaren gör, säger och
+                följer upp när eleven är på plats.
               </p>
             </div>
           </div>
@@ -409,18 +482,174 @@ function FinalTest({ answers, onAnswer }) {
   );
 }
 
-function ResultCard({ score, passed, name, setName, date, onRestart }) {
+function AdminPanel({ records }) {
+  const [sortBy, setSortBy] = useState('date-desc');
+  const [search, setSearch] = useState('');
+
+  const filteredRecords = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const matchingRecords = records.filter((record) => {
+      if (!query) return true;
+
+      return [record.name, record.company, record.county, record.city, record.date]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(query));
+    });
+
+    const compare = {
+      'date-desc': (a, b) =>
+        new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0),
+      'date-asc': (a, b) =>
+        new Date(a.updatedAt || a.createdAt || 0) - new Date(b.updatedAt || b.createdAt || 0),
+      name: (a, b) => a.name.localeCompare(b.name, 'sv'),
+      company: (a, b) => a.company.localeCompare(b.company, 'sv'),
+      county: (a, b) => a.county.localeCompare(b.county, 'sv'),
+      city: (a, b) => a.city.localeCompare(b.city, 'sv'),
+    };
+
+    return [...matchingRecords].sort(compare[sortBy]);
+  }, [records, search, sortBy]);
+
+  return (
+    <Card className="no-print">
+      <div className="space-y-6">
+        <StepHeader section="Admin" title="Genomförda utbildningar">
+          <LayoutDashboard className="h-5 w-5 text-astar-accent" aria-hidden="true" />
+        </StepHeader>
+        <p className="text-base leading-relaxed text-slate-700 sm:text-lg">
+          Här ser du vilka som genomfört utbildningen i den här webbläsaren. Listan går att
+          sortera och söka i.
+        </p>
+
+        <div className="grid gap-4 rounded-lg border border-blue-100 bg-slate-50 p-4 sm:grid-cols-[1fr_220px]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              className="w-full rounded-lg border border-blue-100 bg-white py-3 pl-10 pr-4 text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Sök på namn, företag, län eller stad"
+            />
+          </div>
+          <div className="relative">
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <select
+              className="w-full appearance-none rounded-lg border border-blue-100 bg-white px-4 py-3 text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30"
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+            >
+              <option value="date-desc">Senast genomförd</option>
+              <option value="date-asc">Äldst först</option>
+              <option value="name">Namn A-Ö</option>
+              <option value="company">Företag A-Ö</option>
+              <option value="county">Län A-Ö</option>
+              <option value="city">Stad A-Ö</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-hidden rounded-lg border border-blue-100">
+          <div className="hidden grid-cols-[1.1fr_1fr_1fr_1fr_0.8fr] bg-blue-50 text-sm font-black uppercase tracking-wide text-astar-secondary md:grid">
+            {['Namn', 'Företag', 'Län', 'Stad', 'Datum'].map((heading) => (
+              <div key={heading} className="border-r border-blue-100 px-4 py-3 last:border-r-0">
+                {heading}
+              </div>
+            ))}
+          </div>
+          {filteredRecords.length === 0 ? (
+            <div className="bg-white px-4 py-8 text-center text-slate-600">
+              Inga genomförda utbildningar sparade ännu.
+            </div>
+          ) : (
+            <div className="divide-y divide-blue-100 bg-white">
+              {filteredRecords.map((record) => (
+                <div
+                  key={record.id}
+                  className="grid grid-cols-1 gap-3 px-4 py-4 text-sm text-slate-700 md:grid-cols-[1.1fr_1fr_1fr_1fr_0.8fr] md:gap-4"
+                >
+                  <div>
+                    <p className="font-bold text-astar-navy">{record.name}</p>
+                    <p className="text-xs text-slate-500">Poäng: {record.score} av 5</p>
+                  </div>
+                  <div>
+                    <span className="md:hidden font-bold text-slate-500">Företag: </span>
+                    {record.company}
+                  </div>
+                  <div>
+                    <span className="md:hidden font-bold text-slate-500">Län: </span>
+                    {record.county}
+                  </div>
+                  <div>
+                    <span className="md:hidden font-bold text-slate-500">Stad: </span>
+                    {record.city}
+                  </div>
+                  <div>
+                    <span className="md:hidden font-bold text-slate-500">Datum: </span>
+                    {record.date}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function ResultCard({
+  score,
+  passed,
+  participant,
+  setParticipant,
+  date,
+  onRestart,
+  onSaveCompletion,
+}) {
   const [isCreatingPdf, setIsCreatingPdf] = useState(false);
   const [pdfError, setPdfError] = useState('');
+  const availableCities = getCitiesForCounty(participant.county);
+  const canPrintCertificate =
+    passed &&
+    participant.name.trim() &&
+    participant.company.trim() &&
+    participant.county &&
+    participant.city;
+
+  function updateParticipant(field, value) {
+    setParticipant((current) => {
+      if (field === 'county') {
+        return {
+          ...current,
+          county: value,
+          city: '',
+        };
+      }
+
+      return {
+        ...current,
+        [field]: value,
+      };
+    });
+  }
 
   async function handlePrintCertificate() {
+    if (!canPrintCertificate) {
+      setPdfError('Fyll i namn, företag, län och stad innan du skriver ut certifikatet.');
+      return;
+    }
+
     setPdfError('');
     setIsCreatingPdf(true);
 
     try {
+      onSaveCompletion();
       const { openCertificatePdf } = await import('./certificatePdf.js');
       await openCertificatePdf({
-        name,
+        name: participant.name,
+        company: participant.company,
+        county: participant.county,
+        city: participant.city,
         date,
         score,
         logoSrc: '/astar-logo.jpg',
@@ -435,23 +664,70 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
   return (
     <Card className="overflow-hidden">
       <div className="space-y-6">
-        <StepHeader section="Certifikat" title="APL-handledare – Astar">
+        <StepHeader section="Certifikat" title="APL-handledare - Astar">
           <Award className="h-5 w-5 text-astar-accent" aria-hidden="true" />
         </StepHeader>
         <p className="text-lg text-slate-800">
           Har genomfört Astar handledarutbildning enligt Skolverkets riktlinjer.
         </p>
         <div className="rounded-lg border border-blue-100 bg-gradient-to-br from-slate-50 to-white p-5">
-          <label className="block text-sm font-bold uppercase tracking-wide text-astar-secondary" htmlFor="name">
-            Namn
-          </label>
-          <input
-            id="name"
-            className="mt-2 w-full rounded-md border border-blue-100 bg-white px-4 py-3 text-lg text-slate-950 outline-none focus:border-astar-secondary focus:ring-2 focus:ring-astar-light/40"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder="Skriv ditt namn"
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField label="Namn" htmlFor="name" icon={UserRound} required>
+              <input
+                id="name"
+                className="w-full rounded-lg border border-blue-100 bg-white px-4 py-3 text-lg text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30"
+                value={participant.name}
+                onChange={(event) => updateParticipant('name', event.target.value)}
+                placeholder="Skriv ditt namn"
+              />
+            </FormField>
+            <FormField label="Företag" htmlFor="company" icon={Building2} required>
+              <input
+                id="company"
+                className="w-full rounded-lg border border-blue-100 bg-white px-4 py-3 text-lg text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30"
+                value={participant.company}
+                onChange={(event) => updateParticipant('company', event.target.value)}
+                placeholder="Vilket företag kommer du från?"
+              />
+            </FormField>
+            <FormField label="Län" htmlFor="county" icon={MapPinned} required>
+              <div className="relative">
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                <select
+                  id="county"
+                  className="w-full appearance-none rounded-lg border border-blue-100 bg-white px-4 py-3 text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30"
+                  value={participant.county}
+                  onChange={(event) => updateParticipant('county', event.target.value)}
+                >
+                  <option value="">Välj län</option>
+                  {countyOptions.map((county) => (
+                    <option key={county.name} value={county.name}>
+                      {county.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </FormField>
+            <FormField label="Stad" htmlFor="city" icon={MapPinned} required>
+              <div className="relative">
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+                <select
+                  id="city"
+                  className="w-full appearance-none rounded-lg border border-blue-100 bg-white px-4 py-3 text-slate-950 outline-none focus:border-astar-secondary focus:ring-4 focus:ring-astar-light/30 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500"
+                  value={participant.city}
+                  onChange={(event) => updateParticipant('city', event.target.value)}
+                  disabled={!participant.county}
+                >
+                  <option value="">{participant.county ? 'Välj stad' : 'Välj län först'}</option>
+                  {availableCities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </FormField>
+          </div>
           <dl className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg bg-white p-3">
               <dt className="text-sm text-slate-600">Datum</dt>
@@ -475,12 +751,18 @@ function ResultCard({ score, passed, name, setName, date, onRestart }) {
             message="Du behöver minst 4 rätt. Starta om och gör utbildningen igen."
           />
         )}
+        {passed && !canPrintCertificate && (
+          <FeedbackBox
+            isCorrect={false}
+            message="Fyll i namn, företag, län och stad innan certifikatet kan skrivas ut och sparas i adminöversikten."
+          />
+        )}
         <div className="no-print flex flex-wrap gap-3">
           {passed && (
             <AppButton
               variant="secondary"
               onClick={handlePrintCertificate}
-              disabled={isCreatingPdf}
+              disabled={isCreatingPdf || !canPrintCertificate}
             >
               <Printer className="h-5 w-5" aria-hidden="true" />
               {isCreatingPdf ? 'Skapar certifikat...' : 'Skriv ut certifikat'}
@@ -525,7 +807,17 @@ export default function App() {
   const [finalAnswers, setFinalAnswers] = useState(
     savedState?.finalAnswers ?? Array(finalQuestions.length).fill(null),
   );
-  const [name, setName] = useState(savedState?.name ?? '');
+  const [participant, setParticipant] = useState(
+    savedState?.participant ?? {
+      name: '',
+      company: '',
+      county: '',
+      city: '',
+    },
+  );
+  const [completionId, setCompletionId] = useState(savedState?.completionId ?? '');
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [completionRecords, setCompletionRecords] = useState(() => loadCompletions());
   const [certificateDate, setCertificateDate] = useState(savedState?.certificateDate ?? getToday());
 
   const finalScore = finalAnswers.reduce(
@@ -551,13 +843,51 @@ export default function App() {
         currentStep,
         courseAnswers,
         finalAnswers,
-        name,
+        name: participant.name,
+        company: participant.company,
+        county: participant.county,
+        city: participant.city,
+        completionId,
         certificateDate,
         finalScore,
         passed,
       }),
     );
-  }, [certificateDate, courseAnswers, currentStep, finalAnswers, finalScore, name, passed]);
+  }, [
+    certificateDate,
+    completionId,
+    courseAnswers,
+    currentStep,
+    finalAnswers,
+    finalScore,
+    participant,
+    passed,
+  ]);
+
+  function handleSaveCompletion() {
+    if (!passed) return;
+
+    const trimmedName = participant.name.trim();
+    const trimmedCompany = participant.company.trim();
+    if (!trimmedName || !trimmedCompany || !participant.county || !participant.city) return;
+
+    const nextCompletionId = completionId || getCompletionId();
+    if (!completionId) {
+      setCompletionId(nextCompletionId);
+    }
+
+    saveCompletionRecord({
+      id: nextCompletionId,
+      name: trimmedName,
+      company: trimmedCompany,
+      county: participant.county,
+      city: participant.city,
+      date: certificateDate,
+      score: finalScore,
+    });
+
+    setCompletionRecords(loadCompletions());
+  }
 
   function handleCourseAnswer(index) {
     setCourseAnswers((answers) =>
@@ -595,7 +925,13 @@ export default function App() {
     setCurrentStep(START_STEP);
     setCourseAnswers(Array(courseSteps.length).fill(null));
     setFinalAnswers(Array(finalQuestions.length).fill(null));
-    setName('');
+    setParticipant({
+      name: '',
+      company: '',
+      county: '',
+      city: '',
+    });
+    setCompletionId('');
     setCertificateDate(getToday());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -657,23 +993,21 @@ export default function App() {
           />
         )}
 
-        {isFinalTest && (
-          <FinalTest
-            answers={finalAnswers}
-            onAnswer={handleFinalAnswer}
-          />
-        )}
+        {isFinalTest && <FinalTest answers={finalAnswers} onAnswer={handleFinalAnswer} />}
 
         {isCertificate && (
           <ResultCard
             score={finalScore}
             passed={passed}
-            name={name}
-            setName={setName}
+            participant={participant}
+            setParticipant={setParticipant}
             date={certificateDate}
             onRestart={handleRestart}
+            onSaveCompletion={handleSaveCompletion}
           />
         )}
+
+        {showAdmin && <AdminPanel records={completionRecords} />}
 
         {!isStart && !isCertificate && (
           <Navigation
@@ -689,6 +1023,13 @@ export default function App() {
           <Sparkles className="h-4 w-4 text-astar-accent" aria-hidden="true" />
           Progress och resultat sparas automatiskt i den här webbläsaren.
         </footer>
+
+        <div className="no-print flex justify-center">
+          <AppButton variant="ghost" onClick={() => setShowAdmin((value) => !value)}>
+            <LayoutDashboard className="h-5 w-5" aria-hidden="true" />
+            {showAdmin ? 'Dölj adminöversikt' : 'Visa adminöversikt'}
+          </AppButton>
+        </div>
 
         <button
           className="no-print fixed bottom-4 right-4 z-20 hidden rounded-md border border-astar-accent bg-white px-3 py-2 text-xs font-bold text-astar-accent shadow-glow transition hover:bg-red-50 sm:block"
