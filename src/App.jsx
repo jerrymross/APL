@@ -85,6 +85,80 @@ function getCitiesForCounty(county) {
   return countyOptions.find((item) => item.name === county)?.cities ?? [];
 }
 
+function shuffleArray(items) {
+  const nextItems = [...items];
+
+  for (let index = nextItems.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [nextItems[index], nextItems[swapIndex]] = [nextItems[swapIndex], nextItems[index]];
+  }
+
+  return nextItems;
+}
+
+function arraysEqual(left, right) {
+  return left.length === right.length && left.every((value, index) => value === right[index]);
+}
+
+function createShuffledOrder(length, previousOrder = null) {
+  const baseOrder = Array.from({ length }, (_, index) => index);
+
+  if (length < 2) return baseOrder;
+
+  let nextOrder = baseOrder;
+  let attempts = 0;
+
+  while (
+    (arraysEqual(nextOrder, baseOrder) || (previousOrder && arraysEqual(nextOrder, previousOrder))) &&
+    attempts < 12
+  ) {
+    nextOrder = shuffleArray(baseOrder);
+    attempts += 1;
+  }
+
+  return nextOrder;
+}
+
+function createOptionOrders(previousOrders = null) {
+  return {
+    course: courseSteps.map((step, index) =>
+      createShuffledOrder(step.options.length, previousOrders?.course?.[index] ?? null),
+    ),
+    final: finalQuestions.map((question, index) =>
+      createShuffledOrder(question.options.length, previousOrders?.final?.[index] ?? null),
+    ),
+  };
+}
+
+function isValidOptionOrder(orders, sourceItems) {
+  return (
+    Array.isArray(orders) &&
+    orders.length === sourceItems.length &&
+    orders.every((order, itemIndex) => {
+      const expected = sourceItems[itemIndex].options.map((_, index) => index).sort((a, b) => a - b);
+      return (
+        Array.isArray(order) &&
+        order.length === expected.length &&
+        [...order].sort((a, b) => a - b).every((value, valueIndex) => value === expected[valueIndex])
+      );
+    })
+  );
+}
+
+function applyOptionOrder(items, orders) {
+  return items.map((item, itemIndex) => {
+    const order = orders[itemIndex];
+    const randomizedOptions = order.map((originalIndex) => item.options[originalIndex]);
+    const correctIndex = order.findIndex((originalIndex) => originalIndex === item.correctIndex);
+
+    return {
+      ...item,
+      options: randomizedOptions,
+      correctIndex,
+    };
+  });
+}
+
 function loadSavedState() {
   try {
     if (window.location.search.includes('reset=1')) {
@@ -101,6 +175,15 @@ function loadSavedState() {
     const currentStep = Number.isInteger(parsed.currentStep)
       ? Math.min(Math.max(parsed.currentStep, START_STEP), maxStep)
       : START_STEP;
+    const generatedOrders = createOptionOrders();
+    const optionOrders = {
+      course: isValidOptionOrder(parsed.courseOptionOrders, courseSteps)
+        ? parsed.courseOptionOrders
+        : generatedOrders.course,
+      final: isValidOptionOrder(parsed.finalOptionOrders, finalQuestions)
+        ? parsed.finalOptionOrders
+        : generatedOrders.final,
+    };
     const courseAnswers = Array.isArray(parsed.courseAnswers)
       ? courseSteps.map((_, index) =>
           Number.isInteger(parsed.courseAnswers[index]) ? parsed.courseAnswers[index] : null,
@@ -116,6 +199,7 @@ function loadSavedState() {
       currentStep,
       courseAnswers,
       finalAnswers,
+      optionOrders,
       participant: {
         name: typeof parsed.name === 'string' ? parsed.name : '',
         company: typeof parsed.company === 'string' ? parsed.company : '',
@@ -431,7 +515,7 @@ function ScenarioCard(props) {
   return <QuizCard {...props} />;
 }
 
-function FinalTest({ answers, onAnswer }) {
+function FinalTest({ answers, onAnswer, questions }) {
   const answeredCount = answers.filter(Number.isInteger).length;
 
   return (
@@ -446,7 +530,7 @@ function FinalTest({ answers, onAnswer }) {
           Svara på fem korta frågor. Du får resultatet direkt på nästa steg.
         </p>
         <div className="space-y-4">
-          {finalQuestions.map((question, questionIndex) => (
+          {questions.map((question, questionIndex) => (
             <div key={question.id} className="rounded-lg border border-blue-100 bg-slate-50 p-4 sm:p-5">
               <h2 className="mb-3 text-lg font-bold text-astar-navy">
                 {questionIndex + 1}. {question.prompt}
@@ -795,6 +879,15 @@ function Navigation({ canGoBack, canGoNext, isFinalStep, onBack, onNext }) {
 
 export default function App() {
   const savedState = useMemo(loadSavedState, []);
+  const [optionOrders, setOptionOrders] = useState(savedState?.optionOrders ?? createOptionOrders());
+  const randomizedCourseSteps = useMemo(
+    () => applyOptionOrder(courseSteps, optionOrders.course),
+    [optionOrders],
+  );
+  const randomizedFinalQuestions = useMemo(
+    () => applyOptionOrder(finalQuestions, optionOrders.final),
+    [optionOrders],
+  );
   const [currentStep, setCurrentStep] = useState(savedState?.currentStep ?? START_STEP);
   const [courseAnswers, setCourseAnswers] = useState(
     savedState?.courseAnswers ?? Array(courseSteps.length).fill(null),
@@ -816,7 +909,7 @@ export default function App() {
   const [certificateDate, setCertificateDate] = useState(savedState?.certificateDate ?? getToday());
 
   const finalScore = finalAnswers.reduce(
-    (total, answer, index) => total + (answer === finalQuestions[index].correctIndex ? 1 : 0),
+    (total, answer, index) => total + (answer === randomizedFinalQuestions[index].correctIndex ? 1 : 0),
     0,
   );
   const passed = finalScore >= 4;
@@ -838,6 +931,8 @@ export default function App() {
         currentStep,
         courseAnswers,
         finalAnswers,
+        courseOptionOrders: optionOrders.course,
+        finalOptionOrders: optionOrders.final,
         name: participant.name,
         company: participant.company,
         county: participant.county,
@@ -855,6 +950,7 @@ export default function App() {
     currentStep,
     finalAnswers,
     finalScore,
+    optionOrders,
     participant,
     passed,
   ]);
@@ -920,6 +1016,7 @@ export default function App() {
     setCurrentStep(START_STEP);
     setCourseAnswers(Array(courseSteps.length).fill(null));
     setFinalAnswers(Array(finalQuestions.length).fill(null));
+    setOptionOrders((currentOrders) => createOptionOrders(currentOrders));
     setParticipant({
       name: '',
       company: '',
@@ -933,12 +1030,12 @@ export default function App() {
 
   function handleSkipToPassed() {
     setCurrentStep(CERTIFICATE_STEP);
-    setFinalAnswers(finalQuestions.map((question) => question.correctIndex));
+    setFinalAnswers(randomizedFinalQuestions.map((question) => question.correctIndex));
     setCertificateDate(getToday());
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  const currentCourseStep = currentStep >= 0 ? courseSteps[currentStep] : null;
+  const currentCourseStep = currentStep >= 0 ? randomizedCourseSteps[currentStep] : null;
 
   return (
     <main className="min-h-screen overflow-x-hidden px-4 py-4 sm:px-6 lg:py-8">
@@ -988,7 +1085,13 @@ export default function App() {
           />
         )}
 
-        {isFinalTest && <FinalTest answers={finalAnswers} onAnswer={handleFinalAnswer} />}
+        {isFinalTest && (
+          <FinalTest
+            answers={finalAnswers}
+            onAnswer={handleFinalAnswer}
+            questions={randomizedFinalQuestions}
+          />
+        )}
 
         {isCertificate && (
           <ResultCard
